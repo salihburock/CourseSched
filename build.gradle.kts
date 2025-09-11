@@ -1,9 +1,10 @@
 plugins {
-    id("java")
+    id("org.openjfx.javafxplugin") version "0.1.0"
+    application
 }
 
 group = "org.example"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 repositories {
     mavenCentral()
@@ -14,9 +15,17 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.apache.poi:poi:5.3.0")
-    implementation("org.apache.poi:poi-ooxml:5.3.0")}
+    implementation("org.apache.poi:poi-ooxml:5.3.0")
+    implementation("com.opencsv:opencsv:5.7.1")
+    implementation("org.openjfx:javafx-controls:21.0.2")
+    implementation("org.openjfx:javafx-fxml:21.0.2")
+}
 
 tasks.test {
     useJUnitPlatform()
 }
 
+javafx {
+    version = "21.0.2"
+    modules = listOf("javafx.controls", "javafx.fxml")
+}
