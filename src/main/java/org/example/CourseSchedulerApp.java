@@ -23,6 +23,11 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Random;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import javax.swing.border.StrokeBorder;
 
 import org.example.*;
 
@@ -32,7 +37,7 @@ public class CourseSchedulerApp extends Application {
     private final int startHour = 8;   // earliest time
     private final int endHour = 20;    // latest time (8 PM)
     private final int slotMinutes = 30; // resolution of grid (30 min slots)
-    List<Course> SelectedCourses = new ArrayList<Course>();
+    ObservableList<Course> SelectedCourses = FXCollections.observableArrayList();
 
     @Override
     public void start(Stage stage) {
@@ -47,17 +52,23 @@ public class CourseSchedulerApp extends Application {
         courseListView.setPrefWidth(300);
         List<Course> courses = ReadCourses.getCourses();
         
+        ListView<Course> selectedCourseListView = new ListView<>();
+        selectedCourseListView.setPrefWidth(300);
+        selectedCourseListView.setItems(SelectedCourses);
+
+
         ObservableList<Course> observableCourses = FXCollections.observableArrayList(courses);
         FilteredList<Course> filteredCourses = new FilteredList<>(observableCourses, p -> true);
         
         courseListView.setItems(filteredCourses);
 
         searchBar.textProperty().addListener((obs, oldVal, newVal) -> {
-            String filter = newVal.toLowerCase();
-            filteredCourses.setPredicate(course -> {
-                if (filter.isEmpty()) {return true;}
-                else {return course.toString().toLowerCase().contains(filter);}
-            });
+            try{
+                Pattern pattern = Pattern.compile(newVal, Pattern.CASE_INSENSITIVE);
+                filteredCourses.setPredicate(course -> pattern.matcher(course.toString()).find());
+            } catch (PatternSyntaxException e) {
+                filteredCourses.setPredicate(course -> false);
+            }
         });
 
 
@@ -72,17 +83,17 @@ public class CourseSchedulerApp extends Application {
         buildScheduleGrid();
 
         courseListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
+            if (newVal != null && !SelectedCourses.contains(newVal)) {
                 SelectedCourses.add(0, newVal);
-                System.out.println(SelectedCourses);
-                drawSchedule(SelectedCourses);                
+                drawSchedule(SelectedCourses);
             }
-
         });
+
 
 
         BorderPane root = new BorderPane();
         root.setLeft(courseListView);
+        root.setLeft(selectedCourseListView);
         root.setCenter(scheduleGrid);
 
         Scene scene = new Scene(root, 1000, 700);
@@ -91,18 +102,27 @@ public class CourseSchedulerApp extends Application {
         stage.show();
     
         Button clearButton = new Button("Clear");
-        clearButton.setOnAction(new EventHandler<ActionEvent>() {
-        @Override
-        public void handle(ActionEvent event) {
-                SelectedCourses.clear();
-                drawSchedule(SelectedCourses);
-            }
+        clearButton.setOnAction(event -> {
+            SelectedCourses.clear();
+            drawSchedule(SelectedCourses);
         });
 
+        Label creditLabel = new Label();
+        creditLabel.setTextFill(Color.BLUE);
+        creditLabel.setPadding(new Insets(5));
+        creditLabel.setText("Total Credits: 0");
+        SelectedCourses.addListener((javafx.collections.ListChangeListener.Change<? extends Course> c) -> {
+            int totalCredits = 0;
+            for (Course course : SelectedCourses) {
+                totalCredits += course.getCredits();
+            }
+            creditLabel.setText("Total Credits: " + totalCredits);
+        });
+        root.setBottom(creditLabel);
 
 
 
-        VBox leftPane = new VBox(10, searchBar, courseListView, clearButton);
+        VBox leftPane = new VBox(10, searchBar, courseListView, clearButton, selectedCourseListView);
         leftPane.setPadding(new Insets(10));
         root.setLeft(leftPane);
 
@@ -151,9 +171,10 @@ public class CourseSchedulerApp extends Application {
                 int startSlot = (startMin - startHour * 60) / slotMinutes + 1; // +1 because row 0 is header
                 int endSlot = (endMin - startHour * 60) / slotMinutes + 1;
                 
-                Label blockLabel = new Label(course.getTitle() + "\n" + course.getInstructor());
-                
-                blockLabel.setStyle("-fx-background-color: lightblue; -fx-border-color: black; -fx-padding: 5;");
+                Label blockLabel = new Label(course.getTitle() + " " +course.getCourseNo() + course.getSection() + "\n" + course.getInstructor());
+                Random generator = new Random(course.getCourseNo().hashCode());
+
+                blockLabel.setStyle("-fx-background-color: COLORTOCHANGE; -fx-border-color: black; -fx-padding: 5;".replace("COLORTOCHANGE","#"+String.format("%06d",generator.nextInt(999999))+"40").toString());
                 blockLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
                 blockLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
                     @Override
