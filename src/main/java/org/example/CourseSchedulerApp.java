@@ -50,7 +50,7 @@ public class CourseSchedulerApp extends Application {
         // Left: list of courses
         ListView<Course> courseListView = new ListView<>();
         courseListView.setPrefWidth(300);
-        List<Course> courses = ReadCourses.getCourses();
+        List<Course> courses = ReadCourses.getCourses("src/assets");
         
         ListView<Course> selectedCourseListView = new ListView<>();
         selectedCourseListView.setPrefWidth(300);

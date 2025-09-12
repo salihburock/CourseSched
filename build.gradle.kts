@@ -19,8 +19,10 @@ dependencies {
     implementation("com.opencsv:opencsv:5.7.1")
     implementation("org.openjfx:javafx-controls:21.0.2")
     implementation("org.openjfx:javafx-fxml:21.0.2")
+    implementation("org.seleniumhq.selenium:selenium-java:4.35.0")
+    implementation("org.jsoup:jsoup:1.17.2")
+    implementation("org.slf4j:slf4j-simple:2.0.16")
 }
-
 tasks.test {
     useJUnitPlatform()
 }
