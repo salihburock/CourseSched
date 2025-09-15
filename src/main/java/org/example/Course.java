@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 
@@ -58,7 +59,7 @@ public class Course {
 
 
     public Dictionary getFormattedSched() {
-        String[] blocks = this.schedule.split("\n");
+        String[] blocks = this.schedule.split("\\r?\\n");
         Dictionary<String, Integer> FinalObject = new java.util.Hashtable<>();
 
         for (String block : blocks) {
@@ -69,17 +70,21 @@ public class Course {
             String day = parts[0].trim();
             String timeRange = parts[1].trim();
 
+
             Integer dayNum = dayMap.get(day);
+
             if (dayNum == null) continue;
 
-            String[] times = timeRange.split("-");
-            if (times.length != 2) continue;
 
+
+            String[] times = timeRange.split("-");
+
+
+            if (times.length != 2) continue;
             String startTime = times[0].trim();
             startTime = String.valueOf(Integer.parseInt(startTime.split(":")[0])*60 + Integer.parseInt(startTime.split(":")[1]));
             String endTime = times[1].trim();
             endTime = String.valueOf(Integer.parseInt(endTime.split(":")[0])*60 + Integer.parseInt(endTime.split(":")[1]));
-
             String formattedBlock = String.format("%d|%s|%s", dayNum, startTime, endTime);
             // FinalObject.put("Day", dayNum);
             // FinalObject.put("Start", Integer.parseInt(startTime));
@@ -98,9 +103,14 @@ public class Course {
     {
         dayMap = new java.util.Hashtable<>();
         dayMap.put("Pazartesi", 1);
+        dayMap.put("Monday", 1);
         dayMap.put("Salı", 2);
+        dayMap.put("Tuesday", 2);
         dayMap.put("Çarşamba", 3);
+        dayMap.put("Wednesday", 3);
         dayMap.put("Perşembe", 4);
+        dayMap.put("Thursday", 4);
         dayMap.put("Cuma", 5);
+        dayMap.put("Friday", 5);
     }
 }

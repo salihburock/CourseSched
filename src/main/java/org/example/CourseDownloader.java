@@ -12,6 +12,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -120,26 +121,14 @@ public class CourseDownloader {
     }
 
     private static void waitForFileDownload(Path downloadDir, int timeoutInSeconds) throws Exception {
+
+        File[] filesInDirAtStart = downloadDir.toFile().listFiles();
+
         long startTime = System.currentTimeMillis();
 
         while (System.currentTimeMillis() - startTime < timeoutInSeconds * 1000) {
-            File[] files = downloadDir.toFile().listFiles((dir, name) -> 
-                name.startsWith(".org.chromium.Chromium")
-            );
+            
 
-            if (files != null && files.length > 0) {
-                File downloadedFile = files[0];
-                
-                // Track file size
-                long initialSize = downloadedFile.length();
-                Thread.sleep(1000); 
-                long finalSize = downloadedFile.length();
-
-                if (initialSize > 0 && initialSize == finalSize) {
-                    return; 
-                }
-            }
-            Thread.sleep(500); 
         }
         throw new Exception("File download timed out after " + timeoutInSeconds + " seconds.");
     }

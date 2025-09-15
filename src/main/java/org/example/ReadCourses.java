@@ -57,6 +57,8 @@ public class ReadCourses {
                     continue;
                 }
                 
+                
+
                 if (isRowEmpty(row)) {
                     continue;
                 }
@@ -167,5 +169,9 @@ public class ReadCourses {
             }
         }
         return true;
+    }
+
+    public static void main(String[] args) {
+        readCourses("src/assets");
     }
 }
