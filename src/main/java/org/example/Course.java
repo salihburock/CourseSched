@@ -58,7 +58,7 @@ public class Course {
 
 
     public Dictionary getFormattedSched() {
-        String[] blocks = this.schedule.split("~");
+        String[] blocks = this.schedule.split("\n");
         Dictionary<String, Integer> FinalObject = new java.util.Hashtable<>();
 
         for (String block : blocks) {
