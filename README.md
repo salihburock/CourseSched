@@ -1,1 +1,1 @@
-Course Parser With Java
+Schedule Editor for Özyeğin University
