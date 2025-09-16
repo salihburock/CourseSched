@@ -16,9 +16,9 @@ public class ReadCourses {
     public static List<Course> getCourses(String xlsDir) {
         List<Course> courses = readCourses(xlsDir);
 
-        for (Course c : courses) {
-            System.out.println(Arrays.asList(c.getFormattedSched()));
-        }
+        // for (Course c : courses) {
+        //     System.out.println(Arrays.asList(c.getFormattedSched()));
+        // }
         return courses;
     }
 

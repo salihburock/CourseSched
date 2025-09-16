@@ -7,8 +7,11 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -19,6 +22,9 @@ import javafx.stage.Stage;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -37,7 +43,10 @@ public class CourseSchedulerApp extends Application {
     private final int startHour = 8;   // earliest time
     private final int endHour = 20;    // latest time (8 PM)
     private final int slotMinutes = 30; // resolution of grid (30 min slots)
-    ObservableList<Course> SelectedCourses = FXCollections.observableArrayList();
+    public ObservableList<Course> SelectedCourses = FXCollections.observableArrayList();
+    public String[] facultyList = new String[]{"Faculty of Aviation and Aeronautical Sciences","Faculty of Architecture and Design", "Faculty of Social Sciences", "Faculty of Applied Sciences", "Faculty of Engineering", "Faculty of Business", "Faculty of Law", "Graduate School of Business", "Graduate School of Science and Engineering" };
+
+
 
     @Override
     public void start(Stage stage) {
@@ -61,7 +70,7 @@ public class CourseSchedulerApp extends Application {
         FilteredList<Course> filteredCourses = new FilteredList<>(observableCourses, p -> true);
         
         courseListView.setItems(filteredCourses);
-
+;
         searchBar.textProperty().addListener((obs, oldVal, newVal) -> {
             try{
                 Pattern pattern = Pattern.compile(newVal, Pattern.CASE_INSENSITIVE);
@@ -107,6 +116,16 @@ public class CourseSchedulerApp extends Application {
             drawSchedule(SelectedCourses);
         });
 
+        Button settingsButton = new Button("⚙");
+        settingsButton.setOnAction(event -> {
+            openSettingsMenu();
+        });
+
+        Button refreshButton = new Button("⟳");
+        settingsButton.setOnAction(event -> {
+            start(stage);
+        });
+
         Label creditLabel = new Label();
         creditLabel.setTextFill(Color.BLUE);
         creditLabel.setPadding(new Insets(5));
@@ -122,10 +141,10 @@ public class CourseSchedulerApp extends Application {
 
 
 
-        VBox leftPane = new VBox(10, searchBar, courseListView, clearButton, selectedCourseListView);
+        VBox leftPane = new VBox(10, searchBar, courseListView, clearButton, settingsButton,  selectedCourseListView);
         leftPane.setPadding(new Insets(10));
         root.setLeft(leftPane);
-
+        openSettingsMenu();
     }
 
     private void buildScheduleGrid() {
@@ -185,11 +204,69 @@ public class CourseSchedulerApp extends Application {
                 });
                 // Add to grid with row span
                 scheduleGrid.add(blockLabel, dayCol, startSlot, 1, endSlot - startSlot);
-            }
+            
+                
         }
+    }
+    }
+    
+    private void openSettingsMenu() {
+
+        TilePane tilePaneObject = new TilePane();
+        Label headerLabel = new Label("Select courses to fetch");
+        List<String> selectedFacultyList = new ArrayList<>();
+        CourseDownloader downloader = new CourseDownloader();
+        
+        Button fetchButton = new Button("⤓");
+        fetchButton.setOnAction(event -> {
+            for (int j=0; j<selectedFacultyList.size(); j++) {
+                downloader.downloadFacultyCoursesForCurrentTerm(selectedFacultyList.get(j));
+            }
+        });
+
+
+        for (int i =0; i<facultyList.length; i++) {
+            final int idx = i;
+            CheckBox c = new CheckBox(facultyList[idx]);
+            c.setMinWidth(300);
+            tilePaneObject.getChildren().add(c);
+
+            EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+                public void handle(ActionEvent e)
+                {
+                    
+                    if (c.isSelected())
+                    {
+                        selectedFacultyList.add(facultyList[idx]);    
+                    } else {
+                        selectedFacultyList.remove(selectedFacultyList.indexOf(facultyList[idx]));
+                    }
+
+
+                    System.out.println(selectedFacultyList);
+                }
+
+            };
+
+            c.setOnAction(event);
+            
+
+        }
+
+        tilePaneObject.getChildren().add(fetchButton);
+
+        Stage stage = new Stage();
+        stage.setTitle("Settings");
+        Scene sc = new Scene(tilePaneObject, 350, 200);
+        stage.setScene(sc);
+        stage.show();
+
+
+
     }
 
     public static void main(String[] args) {
         launch(args);
+        
     }
 }

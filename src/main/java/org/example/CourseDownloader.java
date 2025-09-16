@@ -62,30 +62,24 @@ public class CourseDownloader {
         });
 
         try {
-            System.out.println("Navigating to the form URL in headless mode...");
             driver.get("https://sis.ozyegin.edu.tr/OZU_GWT/WEB/CourseCatalogOfferUI?locale=en");
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
 
-            System.out.println("Selecting faculty: " + facultyName);
             WebElement facultyDropdown = wait.until(ExpectedConditions.elementToBeClickable(By.name("FACULTYCODE")));
             facultyDropdown.sendKeys(facultyName.split(" ")[0]); 
             WebElement facultyOption = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//nobr[text()='" + facultyName + "']")));
             facultyOption.click();
-            System.out.println("✅ Faculty clicked.");
 
             WebElement searchBtn = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@role='button' and .//td[text()='Search']]")));
             searchBtn.click();
-            System.out.println("✅ Search clicked.");
 
             Thread.sleep(3000);
 
-            System.out.println("Clicking the Export button...");
             WebElement excelButton = wait.until(ExpectedConditions.elementToBeClickable(
                 By.xpath("//td[@class='toolStripButton' and .//img[contains(@src, 'excel_export.png')]]")
             ));
             excelButton.click();
 
-            System.out.println("Waiting for the server to provide the Excel file path...");
             String responseBody = futureResponse.get(30, TimeUnit.SECONDS);
 
             Pattern pattern = Pattern.compile("\"(.*?\\.xls)\"");
@@ -95,7 +89,6 @@ public class CourseDownloader {
                 String tempFilePath = matcher.group(1);
                 String downloadUrl = "https://sis.ozyegin.edu.tr/OZU_GWT/coreneo_web_server/ExcelDownloadServlet?fileName=" + tempFilePath;
 
-                System.out.println("Triggering download and waiting for file to appear...");
                 String script = "var link = document.createElement('a');" +
                                 "link.href = arguments[0];" +
                                 "link.download = arguments[1];" +
@@ -127,7 +120,11 @@ public class CourseDownloader {
         long startTime = System.currentTimeMillis();
 
         while (System.currentTimeMillis() - startTime < timeoutInSeconds * 1000) {
-            
+            File[] currentFilesInDir = downloadDir.toFile().listFiles();
+            if (filesInDirAtStart.length != currentFilesInDir.length) {
+                return;
+            }
+            Thread.sleep(500);
 
         }
         throw new Exception("File download timed out after " + timeoutInSeconds + " seconds.");
